@@ -1,3 +1,6 @@
 [submodule "vendor/rplidar_sdk"]
 	path = vendor/rplidar_sdk
 	url = https://github.com/Slamtec/rplidar_sdk
+[submodule "vendor/boost"]
+	path = vendor/boost
+	url = https://github.com/boostorg/boost
