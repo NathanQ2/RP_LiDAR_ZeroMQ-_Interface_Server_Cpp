@@ -3,9 +3,6 @@
 .fleet
 .vscode
 
-# boost docs bc file names too long
-#vendor/boost_1_85_0/doc
-
 # cmake
 cmake-build-debug
 cmake-build-release
