@@ -88,6 +88,8 @@ int main(int argc, const char** argv) {
     boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
     auto* sharedMemory = (Packet*)region.get_address();
 
+    std::cout << "Scanning..." << std::endl;
+
     while (true) {
         res = driver->grabScanDataHqWithTimeStamp(nodes, nodeCount, timestamp);
         if (!SL_IS_OK(res)) {
@@ -103,16 +105,14 @@ int main(int argc, const char** argv) {
 
         Packet packet{};
         packet.timestamp = timestamp;
-        std::cout << "Timestmap: " << timestamp << std::endl;
-        std::cout << "angle 1: " << (uint16_t)nodes[0].angle_z_q14 << std::endl;
-        std::cout << "dist 1: " << (uint32_t)nodes[0].dist_mm_q2 << std::endl;
+//        std::cout << "Timestmap: " << timestamp << std::endl;
+//        std::cout << "angle 1: " << (uint16_t)nodes[0].angle_z_q14 << std::endl;
+//        std::cout << "dist 1: " << (uint32_t)nodes[0].dist_mm_q2 << std::endl;
 
 
         std::copy(std::begin(nodes), std::end(nodes), std::begin(packet.nodes));
 
         *sharedMemory = packet;
-
-//        std::cin.get();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
