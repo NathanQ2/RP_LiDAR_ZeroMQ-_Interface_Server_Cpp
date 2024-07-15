@@ -10,7 +10,7 @@
 
 #include "Packet.h"
 
-int main() {
+int main(int argc, const char** argv) {
     boost::interprocess::shared_memory_object::remove("RP_LiDAR_Shared_Memory");
 
     boost::interprocess::shared_memory_object shm_obj(
@@ -21,7 +21,13 @@ int main() {
 
     const uint32_t timeout = 5000;
 
-    sl::Result<sl::IChannel*> channelResult = sl::createSerialPortChannel("com3", 115200);
+    if (argc != 2) {
+        std::cerr << "ERR: Invalid number of arguments, got " << argc << " but expected 2" << std::endl;
+        return -1;
+    }
+    const char* device = argv[1];
+    std::cout << "Opening channel on device: " << device << std::endl;
+    sl::Result<sl::IChannel*> channelResult = sl::createSerialPortChannel(device, 115200);
     sl::Result<sl::ILidarDriver*> driverResult = sl::createLidarDriver();
     if (!channelResult) {
         std::cerr << "Error opening channel!" << std::endl;
