@@ -88,7 +88,7 @@ int main(int argc, const char** argv) {
     boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
     auto* sharedMemory = (Packet*)region.get_address();
 
-    std::cout << "Scanning..." << std::endl;
+    std::cout << "Scanning" << std::endl;
 
     while (true) {
         res = driver->grabScanDataHqWithTimeStamp(nodes, nodeCount, timestamp);
