@@ -1,8 +1,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/mapped_region.hpp>
+#include <boost/asio.hpp>
 
 #include <sl_lidar.h>
 #include <sl_lidar_driver.h>
@@ -10,22 +9,27 @@
 
 #include "Packet.h"
 
+using boost::asio::ip::tcp;
+
 int main(int argc, const char** argv)
 {
-    boost::interprocess::shared_memory_object::remove("RP_LiDAR_Shared_Memory");
-
-    boost::interprocess::shared_memory_object shm_obj(
-        boost::interprocess::create_only,
-        "RP_LiDAR_Shared_Memory",
-        boost::interprocess::read_write
-    );
-
     const uint32_t timeout = 5000;
 
-    if (argc != 2) {
-        std::cerr << "ERR: Invalid number of arguments, got " << argc << " but expected 2" << std::endl;
+    if (argc != 4) {
+        std::cerr << "ERR: Invalid number of arguments, got " << argc << " but expected 3" << std::endl;
         return -1;
     }
+
+    const char* ip = argv[2];
+    const char* port = argv[3];
+
+    boost::asio::io_context ioContext;
+    tcp::resolver resolver(ioContext);
+    auto endpoints = resolver.resolve(ip, port);
+
+    tcp::socket socket(ioContext);
+    auto endpoint = boost::asio::connect(socket, endpoints);
+
     const char* device = argv[1];
     std::cout << "Opening channel on device: " << device << std::endl;
     sl::Result<sl::IChannel*> channelResult = sl::createSerialPortChannel(device, 115200);
@@ -90,12 +94,6 @@ int main(int argc, const char** argv)
     size_t nodeCount = sizeof(nodes)/sizeof(sl_lidar_response_measurement_node_hq_t);
     sl_u64 timestamp;
 
-    shm_obj.truncate(sizeof(Packet));
-    std::cout << shm_obj.get_name() << std::endl;
-
-    boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
-    auto* sharedMemory = (Packet*)region.get_address();
-
     std::cout << "Scanning" << std::endl;
 
     while (true) {
@@ -120,7 +118,16 @@ int main(int argc, const char** argv)
 
         std::copy(std::begin(nodes), std::end(nodes), std::begin(packet.nodes));
 
-        *sharedMemory = packet;
+        // Write to socket
+        try {
+            boost::asio::write(socket, boost::asio::buffer(&packet.timestamp, sizeof(packet.timestamp)));
+            boost::asio::write(socket, boost::asio::buffer(packet.nodes, sizeof(packet.nodes)));
+        }
+        catch (const boost::system::system_error& e) {
+            std::cerr << "Error writing to socket: " << e.what() << "\nError Code: " << e.code() << std::endl;
+
+            return -1;
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
@@ -136,6 +143,5 @@ int main(int argc, const char** argv)
     delete channel;
     delete driver;
 
-    boost::interprocess::shared_memory_object::remove("RP_LiDAR_Shared_Memory");
     return 0;
 }
