@@ -10,7 +10,8 @@
 
 #include "Packet.h"
 
-int main(int argc, const char** argv) {
+int main(int argc, const char** argv)
+{
     boost::interprocess::shared_memory_object::remove("RP_LiDAR_Shared_Memory");
 
     boost::interprocess::shared_memory_object shm_obj(
