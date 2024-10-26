@@ -58,6 +58,13 @@ int main(int argc, const char** argv) {
         std::cerr << "Error retrieving device info!" << std::endl;
         std::cerr << res << std::endl;
 
+        // -- cleanup --
+        channel->close();
+        driver->disconnect();
+
+        delete channel;
+        delete driver;
+
         return -1;
     }
 
@@ -122,6 +129,8 @@ int main(int argc, const char** argv) {
 
 
     // -- cleanup --
+    channel->close();
+    driver->disconnect();
 
     delete channel;
     delete driver;
