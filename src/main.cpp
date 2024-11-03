@@ -88,7 +88,8 @@ int main(int argc, const char** argv)
         return -1;
     }
 
-    driver->startScanExpress(false, scanModes[scanModes.size() - 1].id);
+    // driver->startScanExpress(false, scanModes[scanModes.size() - 1].id);
+    driver->startScanExpress(false, scanModes[0].id);
 
     sl_lidar_response_measurement_node_hq_t nodes[291];
     size_t nodeCount = sizeof(nodes)/sizeof(sl_lidar_response_measurement_node_hq_t);
