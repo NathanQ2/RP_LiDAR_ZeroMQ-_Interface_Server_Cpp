@@ -11,9 +11,10 @@
 
 using boost::asio::ip::tcp;
 
+// -- ENTRYPOINT --
 int main(int argc, const char** argv)
 {
-    const uint32_t timeout = 5000;
+    constexpr uint32_t timeout = 5000;
 
     if (argc != 4) {
         std::cerr << "ERR: Invalid number of arguments, got " << argc << " but expected 3" << std::endl;
@@ -23,6 +24,7 @@ int main(int argc, const char** argv)
     const char* ip = argv[2];
     const char* port = argv[3];
 
+    // Create socket on specified port and ip
     boost::asio::io_context ioContext;
     tcp::resolver resolver(ioContext);
     auto endpoints = resolver.resolve(ip, port);
@@ -88,8 +90,8 @@ int main(int argc, const char** argv)
         return -1;
     }
 
-    // driver->startScanExpress(false, scanModes[scanModes.size() - 1].id);
-    driver->startScanExpress(false, scanModes[0].id);
+    driver->startScanExpress(false, scanModes[scanModes.size() - 1].id);
+    // driver->startScanExpress(false, scanModes[0].id);
 
     sl_lidar_response_measurement_node_hq_t nodes[291];
     size_t nodeCount = sizeof(nodes)/sizeof(sl_lidar_response_measurement_node_hq_t);
